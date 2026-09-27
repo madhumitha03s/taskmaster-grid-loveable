@@ -30,7 +30,7 @@ export const COURSE_COLORS = [
 export function courseColorMap(courses: string[]): Map<string, string> {
   const map = new Map<string, string>();
   courses.forEach((course, i) => {
-    map.set(course, COURSE_COLORS[i % COURSE_COLORS.length]);
+    map.set(course, COURSE_COLORS[i % COURSE_COLORS.length] ?? "#2563eb");
   });
   return map;
 }
