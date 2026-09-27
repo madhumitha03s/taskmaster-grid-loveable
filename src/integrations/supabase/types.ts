@@ -14,7 +14,66 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      assignments: {
+        Row: {
+          course: string
+          created_at: string
+          due_date: string
+          estimated_hours: number
+          id: string
+          priority: Database["public"]["Enums"]["assignment_priority"]
+          status: Database["public"]["Enums"]["assignment_status"]
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          course: string
+          created_at?: string
+          due_date: string
+          estimated_hours?: number
+          id?: string
+          priority?: Database["public"]["Enums"]["assignment_priority"]
+          status?: Database["public"]["Enums"]["assignment_status"]
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          course?: string
+          created_at?: string
+          due_date?: string
+          estimated_hours?: number
+          id?: string
+          priority?: Database["public"]["Enums"]["assignment_priority"]
+          status?: Database["public"]["Enums"]["assignment_status"]
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      courses: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +82,8 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      assignment_priority: "low" | "medium" | "high"
+      assignment_status: "not_started" | "in_progress" | "done"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +210,9 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      assignment_priority: ["low", "medium", "high"],
+      assignment_status: ["not_started", "in_progress", "done"],
+    },
   },
 } as const
