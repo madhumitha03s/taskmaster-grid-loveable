@@ -60,7 +60,18 @@ export function AssignmentForm({
   onSubmit,
   onAddCourse,
 }: Props) {
-  const [values, setValues] = useState<AssignmentInput>(initial ?? emptyValues);
+  const [values, setValues] = useState<AssignmentInput>(
+    initial
+      ? {
+          title: initial.title,
+          course: initial.course,
+          due_date: initial.due_date,
+          estimated_hours: initial.estimated_hours,
+          status: initial.status,
+          priority: initial.priority,
+        }
+      : emptyValues,
+  );
   const [newCourse, setNewCourse] = useState("");
   const [saving, setSaving] = useState(false);
 
