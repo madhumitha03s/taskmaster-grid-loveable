@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
@@ -19,6 +19,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { supabase } from "@/integrations/supabase/client";
+import { useAssignments } from "@/lib/assignments";
 
 const DEFAULT_COURSES = ["FADM", "Microeconomics", "OB", "IT for Managers"];
 
@@ -26,6 +27,18 @@ const STATUS_LABEL: Record<string, string> = {
   not_started: "Not started",
   in_progress: "In progress",
   done: "Done",
+};
+
+const STATUS_BADGE_CLASS: Record<string, string> = {
+  not_started: "border-transparent bg-muted text-muted-foreground",
+  in_progress: "border-transparent bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300",
+  done: "border-transparent bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300",
+};
+
+const PRIORITY_BADGE_CLASS: Record<string, string> = {
+  low: "border-transparent bg-sky-100 text-sky-800 dark:bg-sky-900/40 dark:text-sky-300",
+  medium: "border-transparent bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300",
+  high: "border-transparent bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300",
 };
 
 export const Route = createFileRoute("/_authenticated/assignments")({
@@ -56,16 +69,7 @@ function AssignmentsPage() {
     },
   });
 
-  const assignmentsQuery = useQuery({
-    queryKey: ["assignments"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("assignments")
-        .select("id, title, course, due_date, estimated_hours, status, priority");
-      if (error) throw error;
-      return data;
-    },
-  });
+  const assignmentsQuery = useAssignments();
 
   // Seed the starter course list once for a brand-new account.
   useEffect(() => {
@@ -153,6 +157,9 @@ function AssignmentsPage() {
           </h1>
         </div>
         <div className="flex gap-2">
+          <Button variant="outline" asChild>
+            <Link to="/dashboard">Dashboard</Link>
+          </Button>
           <Button
             onClick={() => {
               setEditing(null);
@@ -202,9 +209,13 @@ function AssignmentsPage() {
                   <TableCell>{row.course}</TableCell>
                   <TableCell>{row.due_date}</TableCell>
                   <TableCell>{row.estimated_hours}</TableCell>
-                  <TableCell>{STATUS_LABEL[row.status] ?? row.status}</TableCell>
                   <TableCell>
-                    <Badge variant={row.priority === "high" ? "default" : "secondary"}>
+                    <Badge className={STATUS_BADGE_CLASS[row.status] ?? ""}>
+                      {STATUS_LABEL[row.status] ?? row.status}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <Badge className={PRIORITY_BADGE_CLASS[row.priority] ?? ""}>
                       {row.priority}
                     </Badge>
                   </TableCell>
