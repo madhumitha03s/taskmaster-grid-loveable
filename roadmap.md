@@ -1,0 +1,3 @@
+- [ ] Add shared TaskGrid navigation and logout.
+- [ ] Add empty/loading states, filters, sorting, overdue flags, and mobile layouts.
+- [ ] Verify desktop/mobile experience and publish after security review.
