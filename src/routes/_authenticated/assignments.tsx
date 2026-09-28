@@ -22,7 +22,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { supabase } from "@/integrations/supabase/client";
-import { useAssignments } from "@/lib/assignments";
+import { courseTagMap, useAssignments } from "@/lib/assignments";
 import { format, parseISO } from "date-fns";
 
 const DEFAULT_COURSES = ["FADM", "Microeconomics", "OB", "IT for Managers"];
@@ -35,14 +35,14 @@ const STATUS_LABEL: Record<string, string> = {
 
 const STATUS_BADGE_CLASS: Record<string, string> = {
   not_started: "border-transparent bg-muted text-muted-foreground",
-  in_progress: "border-transparent bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300",
-  done: "border-transparent bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300",
+  in_progress: "border-transparent bg-status-progress text-status-progress-ink",
+  done: "border-transparent bg-status-done text-status-done-ink",
 };
 
 const PRIORITY_BADGE_CLASS: Record<string, string> = {
-  low: "border-transparent bg-sky-100 text-sky-800 dark:bg-sky-900/40 dark:text-sky-300",
-  medium: "border-transparent bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300",
-  high: "border-transparent bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300",
+  low: "border-transparent bg-priority-low text-priority-low-ink",
+  medium: "border-transparent bg-status-progress text-status-progress-ink",
+  high: "border-transparent bg-priority-high text-priority-high-ink",
 };
 
 export const Route = createFileRoute("/_authenticated/assignments")({
@@ -148,6 +148,8 @@ function AssignmentsPage() {
 
   const courseNames = (coursesQuery.data ?? []).map((c) => c.name);
   const availableCourses = [...new Set((assignmentsQuery.data ?? []).map((a) => a.course))].sort();
+  const courseTags = courseTagMap(availableCourses);
+  const renderCourse = (course: string) => <Badge className={`max-w-full break-words border-transparent shadow-none ${courseTags.get(course) ?? "bg-secondary text-secondary-foreground"}`}>{course}</Badge>;
   const hasAssignments = (assignmentsQuery.data?.length ?? 0) > 0;
   const hasFilters = courseFilter !== "all" || statusFilter !== "all";
   const isOverdue = (row: Assignment) => row.status !== "done" && row.due_date < new Date().toISOString().slice(0, 10);
@@ -210,7 +212,7 @@ function AssignmentsPage() {
             {rows.map((row) => (
                 <TableRow key={row.id} className={isOverdue(row) ? "bg-destructive/5" : undefined}>
                   <TableCell className="max-w-64 break-words font-medium">{row.title}</TableCell>
-                  <TableCell>{row.course}</TableCell>
+                   <TableCell>{renderCourse(row.course)}</TableCell>
                   <TableCell className={isOverdue(row) ? "font-semibold text-destructive" : undefined}>{format(parseISO(row.due_date), "d MMM yyyy")}{isOverdue(row) && <span className="ml-1 block text-xs">Overdue</span>}</TableCell>
                   <TableCell>{row.estimated_hours}</TableCell>
                   <TableCell>
@@ -229,7 +231,7 @@ function AssignmentsPage() {
       </div>
       <div className="mt-3 space-y-3 md:hidden">
         {rows.map((row) => <article key={row.id} className={`rounded-md border p-4 ${isOverdue(row) ? "border-destructive/40 bg-destructive/5" : "border-border"}`}>
-          <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-3"><div className="min-w-0"><h2 className="break-words font-semibold text-foreground">{row.title}</h2><p className="mt-1 break-words text-sm text-muted-foreground">{row.course}</p></div><p className={`shrink-0 text-right text-sm ${isOverdue(row) ? "font-semibold text-destructive" : "text-foreground"}`}>{format(parseISO(row.due_date), "d MMM")}{isOverdue(row) && <span className="block text-xs">Overdue</span>}</p></div>
+           <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-3"><div className="min-w-0"><h2 className="break-words font-semibold text-foreground">{row.title}</h2><div className="mt-2">{renderCourse(row.course)}</div></div><p className={`shrink-0 text-right text-sm ${isOverdue(row) ? "font-semibold text-destructive" : "text-foreground"}`}>{format(parseISO(row.due_date), "d MMM")}{isOverdue(row) && <span className="block text-xs">Overdue</span>}</p></div>
           <div className="mt-4 flex flex-wrap items-center justify-between gap-2"><span className="text-xs text-muted-foreground">{row.estimated_hours}h estimated</span>{renderBadges(row)}</div>
           <div className="mt-3 flex justify-end border-t border-border pt-2">{renderActions(row)}</div>
         </article>)}

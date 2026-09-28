@@ -13,8 +13,9 @@ import {
 } from "recharts";
 
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { courseColorMap, useAssignments } from "@/lib/assignments";
+import { courseColorMap, courseTagMap, useAssignments } from "@/lib/assignments";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
@@ -37,6 +38,7 @@ function DashboardPage() {
     [assignments],
   );
   const colors = useMemo(() => courseColorMap(courses), [courses]);
+  const courseTags = useMemo(() => courseTagMap(courses), [courses]);
 
   const hoursByCourse = useMemo(() => {
     const totals = new Map<string, number>();
@@ -187,9 +189,8 @@ function DashboardPage() {
                             style={{ backgroundColor: colors.get(a.course) }}
                           />
                           <span className="text-foreground">{a.title}</span>
-                          <span className="text-muted-foreground">
-                            · {a.course} · {a.estimated_hours}h
-                          </span>
+                           <Badge className={`border-transparent shadow-none ${courseTags.get(a.course) ?? "bg-secondary text-secondary-foreground"}`}>{a.course}</Badge>
+                           <span className="text-muted-foreground">· {a.estimated_hours}h</span>
                           {a.priority === "high" && (
                             <span className="text-xs font-medium text-destructive">high</span>
                           )}
@@ -207,13 +208,7 @@ function DashboardPage() {
       {courses.length > 0 && (
         <div className="mt-4 flex flex-wrap gap-4">
           {courses.map((course) => (
-            <span key={course} className="flex items-center gap-1.5 text-xs text-muted-foreground">
-              <span
-                className="h-2.5 w-2.5 rounded-full"
-                style={{ backgroundColor: colors.get(course) }}
-              />
-              {course}
-            </span>
+             <Badge key={course} className={`border-transparent shadow-none ${courseTags.get(course) ?? "bg-secondary text-secondary-foreground"}`}>{course}</Badge>
           ))}
         </div>
       )}
