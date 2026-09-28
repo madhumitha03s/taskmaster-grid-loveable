@@ -1,3 +1,4 @@
-- [ ] Add shared TaskGrid navigation and logout.
-- [ ] Add empty/loading states, filters, sorting, overdue flags, and mobile layouts.
+- [x] Add shared TaskGrid navigation and logout.
+- [x] Add empty/loading states, filters, sorting, overdue flags, and mobile layouts.
 - [ ] Verify desktop/mobile experience and publish after security review.
+- [x] Apply a cohesive light theme, course-tag colors, and matched chart/button accents.

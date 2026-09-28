@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { addDays, format, isWithinInterval, parseISO, startOfDay } from "date-fns";
 import { useMemo } from "react";
 import {
@@ -12,9 +12,9 @@ import {
   YAxis,
 } from "recharts";
 
-import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { courseColorMap, useAssignments } from "@/lib/assignments";
+import { courseColorMap, courseTagMap, useAssignments } from "@/lib/assignments";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
@@ -23,6 +23,8 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
       { name: "description", content: "Workload overview: hours by course and deadlines on a timeline." },
       { property: "og:title", content: "Dashboard — TaskGrid" },
       { property: "og:description", content: "Workload overview: hours by course and deadlines on a timeline." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: DashboardPage,
@@ -37,6 +39,7 @@ function DashboardPage() {
     [assignments],
   );
   const colors = useMemo(() => courseColorMap(courses), [courses]);
+  const courseTags = useMemo(() => courseTagMap(courses), [courses]);
 
   const hoursByCourse = useMemo(() => {
     const totals = new Map<string, number>();
@@ -79,8 +82,8 @@ function DashboardPage() {
   }, [assignments]);
 
   return (
-    <main className="mx-auto min-h-screen w-full max-w-5xl px-6 py-10">
-      <header className="flex flex-wrap items-center justify-between gap-4">
+    <main className="mx-auto min-h-screen w-full max-w-5xl px-4 py-8 sm:px-6 sm:py-10">
+      <header>
         <div>
           <p className="text-xs font-medium uppercase tracking-[0.3em] text-muted-foreground">
             TaskGrid
@@ -88,11 +91,6 @@ function DashboardPage() {
           <h1 className="mt-2 text-2xl font-semibold tracking-tight text-foreground">
             Dashboard
           </h1>
-        </div>
-        <div className="flex gap-2">
-          <Button variant="outline" asChild>
-            <Link to="/assignments">Assignments</Link>
-          </Button>
         </div>
       </header>
 
@@ -124,23 +122,23 @@ function DashboardPage() {
         </Card>
       </div>
 
-      <Card className="mt-6">
+      <Card className="mt-6 min-w-0 overflow-hidden">
         <CardHeader>
           <CardTitle>Estimated hours by course</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="min-w-0 overflow-hidden">
           {hoursByCourse.length === 0 ? (
             <p className="py-10 text-center text-muted-foreground">
               {assignmentsQuery.isLoading ? "Loading…" : "No pending assignments to chart."}
             </p>
           ) : (
-            <div className="h-72 w-full">
+            <div className="h-72 w-full min-w-0">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={hoursByCourse} margin={{ top: 8, right: 16, left: 0, bottom: 8 }}>
-                  <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
-                  <XAxis dataKey="course" tick={{ fontSize: 12 }} />
-                  <YAxis tick={{ fontSize: 12 }} unit="h" />
-                  <Tooltip formatter={(value) => [`${value}h`, "Estimated hours"]} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                  <XAxis dataKey="course" tick={{ fontSize: 12, fill: "var(--muted-foreground)" }} axisLine={{ stroke: "var(--border)" }} tickLine={false} />
+                  <YAxis tick={{ fontSize: 12, fill: "var(--muted-foreground)" }} axisLine={false} tickLine={false} unit="h" />
+                  <Tooltip contentStyle={{ backgroundColor: "var(--popover)", color: "var(--popover-foreground)", borderColor: "var(--border)", borderRadius: 8 }} formatter={(value) => [`${value}h`, "Estimated hours"]} />
                   <Bar dataKey="hours" radius={[4, 4, 0, 0]}>
                     {hoursByCourse.map((entry) => (
                       <Cell key={entry.course} fill={colors.get(entry.course)} />
@@ -153,7 +151,7 @@ function DashboardPage() {
         </CardContent>
       </Card>
 
-      <Card className="mt-6">
+      <Card className="mt-6 min-w-0">
         <CardHeader>
           <CardTitle>Deadline timeline</CardTitle>
         </CardHeader>
@@ -181,15 +179,14 @@ function DashboardPage() {
                     </p>
                     <ul className="mt-2 space-y-1.5">
                       {items.map((a) => (
-                        <li key={a.id} className="flex items-center gap-2 text-sm">
+                         <li key={a.id} className="flex flex-wrap items-center gap-2 break-words text-sm">
                           <span
                             className="h-2 w-2 shrink-0 rounded-full"
                             style={{ backgroundColor: colors.get(a.course) }}
                           />
-                          <span className="text-foreground">{a.title}</span>
-                          <span className="text-muted-foreground">
-                            · {a.course} · {a.estimated_hours}h
-                          </span>
+                           <span className="min-w-0 text-foreground">{a.title}</span>
+                           <Badge className={`border-transparent shadow-none ${courseTags.get(a.course) ?? "bg-secondary text-secondary-foreground"}`}>{a.course}</Badge>
+                           <span className="text-muted-foreground">· {a.estimated_hours}h</span>
                           {a.priority === "high" && (
                             <span className="text-xs font-medium text-destructive">high</span>
                           )}
@@ -207,13 +204,7 @@ function DashboardPage() {
       {courses.length > 0 && (
         <div className="mt-4 flex flex-wrap gap-4">
           {courses.map((course) => (
-            <span key={course} className="flex items-center gap-1.5 text-xs text-muted-foreground">
-              <span
-                className="h-2.5 w-2.5 rounded-full"
-                style={{ backgroundColor: colors.get(course) }}
-              />
-              {course}
-            </span>
+             <Badge key={course} className={`border-transparent shadow-none ${courseTags.get(course) ?? "bg-secondary text-secondary-foreground"}`}>{course}</Badge>
           ))}
         </div>
       )}
