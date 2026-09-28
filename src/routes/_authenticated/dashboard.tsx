@@ -139,10 +139,10 @@ function DashboardPage() {
             <div className="h-72 w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={hoursByCourse} margin={{ top: 8, right: 16, left: 0, bottom: 8 }}>
-                  <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
-                  <XAxis dataKey="course" tick={{ fontSize: 12 }} />
-                  <YAxis tick={{ fontSize: 12 }} unit="h" />
-                  <Tooltip formatter={(value) => [`${value}h`, "Estimated hours"]} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                  <XAxis dataKey="course" tick={{ fontSize: 12, fill: "var(--muted-foreground)" }} axisLine={{ stroke: "var(--border)" }} tickLine={false} />
+                  <YAxis tick={{ fontSize: 12, fill: "var(--muted-foreground)" }} axisLine={false} tickLine={false} unit="h" />
+                  <Tooltip contentStyle={{ backgroundColor: "var(--popover)", color: "var(--popover-foreground)", borderColor: "var(--border)", borderRadius: 8 }} formatter={(value) => [`${value}h`, "Estimated hours"]} />
                   <Bar dataKey="hours" radius={[4, 4, 0, 0]}>
                     {hoursByCourse.map((entry) => (
                       <Cell key={entry.course} fill={colors.get(entry.course)} />
